@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- haskell notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    <title>
+Learn You A Haskell Notes: Introduction
+</title>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Haskell programming language made while learning a bit about Functional Programming" /> <meta name="keywords" content="Haskell" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="../styles/style-sheet.css" />
+</head>
+
+<body>
+
+<h1 id="learn-you-a-haskell">Learn You A Haskell</h1>
+<h2 id="starting-out">Starting Out</h2>
+<p>This chapter covers the basics of Haskell <code>arithmetic</code>, <code>lists</code>, <code>ranges</code>, <code>list comprehensions</code> and <code>tuples</code> as well as introducing functions.</p>
+<h3 id="ready-set-go">Ready, set go!</h3>
+<h4 id="simple-expressions">Simple Expressions</h4>
+<p>To enter the interactive environment from the command line:</p>
+<pre class="sourceCode bash"><code class="sourceCode bash">    $ ghci</code></pre>
+<p>If you look carefully at the blurb this produces:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">:?</span></code></pre>
+<p>will get you help. The prompt isn't as shown and may get longer as you load more stuff.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    <span class="dt">Prelude</span><span class="fu">&gt;</span> <span class="fu">:</span>set prompt <span class="st">&quot;ghci&gt; &quot;</span></code></pre>
+<p>will put an end to that.</p>
+<p>The interpreter will evaluate simple arithmetic expressions written with the 'usual' infix notation. Parentheses may be used to override the 'usual' operator precedence.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="dv">2</span> <span class="fu">+</span> <span class="dv">15</span>
+    <span class="dv">17</span>
+    ghci<span class="fu">&gt;</span> <span class="dv">49</span> <span class="fu">*</span> <span class="dv">100</span>
+    <span class="dv">4900</span>
+    ghci<span class="fu">&gt;</span> <span class="dv">1892</span> <span class="fu">-</span> <span class="dv">1472</span>
+    <span class="dv">420</span>
+    ghci<span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">/</span> <span class="dv">2</span>
+    <span class="fl">2.5</span></code></pre>
+<p>Beware:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">*</span> <span class="fu">-</span><span class="dv">3</span>                <span class="co">-- precedence error, d&#39;oh !</span>
+
+    ghci<span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">*</span> (<span class="fu">-</span><span class="dv">3</span>)              <span class="co">-- fine, c.f. &#39;high minus&#39; in APL</span>
+    <span class="fu">-</span><span class="dv">15</span></code></pre>
+<p>Boolean algebra is straightforward and optimisation of expression evaluation to be expected since there are no side-effect and Haskell is a lazy language:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="kw">True</span> <span class="fu">&amp;&amp;</span> <span class="kw">False</span>
+    <span class="kw">False</span>
+    ghci<span class="fu">&gt;</span> <span class="kw">True</span> <span class="fu">&amp;&amp;</span> <span class="kw">True</span>
+    <span class="kw">True</span>
+    ghci<span class="fu">&gt;</span> <span class="kw">False</span> <span class="fu">||</span> <span class="kw">True</span>
+    <span class="kw">True</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">not</span> <span class="kw">False</span>
+    <span class="kw">True</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">not</span> (<span class="kw">True</span> <span class="fu">&amp;&amp;</span> <span class="kw">True</span>)
+    <span class="kw">False</span></code></pre>
+<p>Comparison operators:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">==</span> <span class="dv">5</span>
+    <span class="kw">True</span>
+    ghci<span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">/=</span> <span class="dv">5</span>                <span class="co">-- NB</span>
+    <span class="kw">False</span>
+    <span class="dt">Prelude</span><span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">&lt;</span> <span class="dv">4</span>
+    <span class="kw">False</span>
+    <span class="dt">Prelude</span><span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">&lt;=</span> <span class="dv">4</span>
+    <span class="kw">False</span>
+    <span class="dt">Prelude</span><span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">&gt;</span> <span class="dv">4</span>
+    <span class="kw">True</span>
+    <span class="dt">Prelude</span><span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">&gt;=</span> <span class="dv">4</span>
+    <span class="kw">True</span></code></pre>
+<p>Comparison has type checking so the following are not valid:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="dv">5</span> <span class="fu">/=</span> <span class="st">&quot;Bama bama&quot;</span>
+    ghci<span class="fu">&gt;</span> <span class="dv">1</span> <span class="fu">==</span> <span class="kw">True</span></code></pre>
+<p>The comparison operators are valid for strings:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="st">&quot;Hello&quot;</span> <span class="fu">&gt;</span> <span class="st">&quot;Goodbye&quot;</span>   <span class="co">-- lexicographical comparison</span>
+    <span class="kw">True</span>
+    ghci<span class="fu">&gt;</span> <span class="st">&quot;Carol&quot;</span> <span class="fu">&gt;=</span> <span class="st">&quot;Caroline&quot;</span> <span class="co">-- lexicographical comparison</span>
+    <span class="kw">False</span></code></pre>
+<p>since strings are lists with syntactic sugar.</p>
+<h4 id="function-invocation">Function Invocation</h4>
+<p>Look Mum, no parentheses !</p>
+<p>One parameter:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">succ</span> <span class="dv">8</span>                <span class="co">-- generic increment</span>
+    <span class="dv">9</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">pred</span> <span class="dv">8</span>                <span class="co">-- generic decrement</span>
+    <span class="dv">7</span></code></pre>
+<p>With a Boolean result are called predicates:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">odd</span> <span class="dv">2</span>
+    <span class="kw">False</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">even</span> <span class="dv">2</span>
+    <span class="kw">True</span></code></pre>
+<p>Two parameters:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">min</span> <span class="dv">9</span> <span class="dv">10</span>
+    <span class="dv">9</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">max</span> <span class="dv">9</span> <span class="dv">10</span>
+    <span class="dv">10</span></code></pre>
+<p>Function invocation has the highest operator precedence.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">succ</span> <span class="dv">9</span> <span class="fu">+</span> <span class="fu">max</span> <span class="dv">5</span> <span class="dv">4</span> <span class="fu">+</span> <span class="dv">1</span>          <span class="co">-- is the same</span>
+    <span class="dv">16</span>
+    ghci<span class="fu">&gt;</span> (<span class="fu">succ</span> <span class="dv">9</span>) <span class="fu">+</span> (<span class="fu">max</span> <span class="dv">5</span> <span class="dv">4</span>) <span class="fu">+</span> <span class="dv">1</span>      <span class="co">-- as this</span>
+    <span class="dv">16</span></code></pre>
+<p>Most functions are invoked using the prefix notation. However some with two operands are invoked with using infix notation:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    <span class="fu">div</span> <span class="dv">92</span> <span class="dv">10</span>           <span class="co">-- integer division</span>
+    <span class="dv">9</span>
+    <span class="dv">92</span> <span class="ot">`div`</span> <span class="dv">10</span>         <span class="co">-- some believe this to be clearer</span>
+    <span class="dv">9</span></code></pre>
+<p>Also:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    <span class="dv">2</span> <span class="fu">*</span> <span class="dv">2</span>               <span class="co">-- infix notation</span>
+    <span class="dv">4</span>
+    (<span class="fu">*</span>) <span class="dv">2</span> <span class="dv">2</span>             <span class="co">-- prefix notation in ghci (*)</span>
+    <span class="dv">9</span></code></pre>
+<p>However, it is not clear what happens to the operator precedence.</p>
+<h3 id="babys-first-functions">Baby's first functions</h3>
+<p>Writing function involves compilation so you need a text editor and to load/compile your functions.</p>
+<p>In the text editor:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    doubleMe x <span class="fu">=</span> x <span class="fu">+</span> x                      <span class="co">-- no parentheses again</span>
+    doubleUs x y <span class="fu">=</span> doubleMe x <span class="fu">+</span> doubleMe y  <span class="co">-- no comma either</span></code></pre>
+<pre class="sourceCode bash"><code class="sourceCode bash">    ghci<span class="kw">&gt;</span> :l baby
+    [1 of 1] Compiling Main             <span class="kw">(</span> baby.hs, interpreted <span class="kw">)</span>
+    Ok, modules loaded: Main.</code></pre>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> doubleMe <span class="fl">8.3</span>
+    <span class="fl">16.6</span>
+    ghci<span class="fu">&gt;</span> doubleUs <span class="dv">4</span> <span class="dv">9</span>
+    <span class="dv">26</span></code></pre>
+<p>Functions may occur in a file in any order: forward references are fine.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    doubleSmallNumber x <span class="fu">=</span> <span class="kw">if</span> x <span class="fu">&gt;</span> <span class="dv">100</span> <span class="kw">then</span> x <span class="kw">else</span> x <span class="fu">*</span> <span class="dv">2</span></code></pre>
+<p>Since there are no side effects, it follows that all expressions have a result. This includes function invocation. Therefore the <em>else</em> part is mandatory and <em>if ... then ... else</em> is an expression, not a statement.</p>
+<p>It is an expression with low precedence.</p>
+<p>Note: ' is a valid in function names. It is often at the end of a name to indicate a strict (not lazy) function.</p>
+<p>Note: function names cannot start with a capital letter.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    conanO&#39;Brien <span class="fu">=</span> <span class="st">&quot;It&#39;s a-me, Conan O&#39;Brien!&quot;</span></code></pre>
+<p>Is a function with no parameters. So it is a constant (aka definition or name).</p>
+<p>Note: You cannot have naked expressions in a file. I suppose that makes sense.</p>
+<h3 id="an-intro-to-lists">An intro to lists</h3>
+<p>In Haskell, lists are homogeneous data structures of arbitrary length: you cannot mix numbers and strings in a list.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="kw">let</span> lostNumbers <span class="fu">=</span> [<span class="dv">4</span>,<span class="dv">8</span>,<span class="dv">15</span>,<span class="dv">16</span>,<span class="dv">23</span>,<span class="dv">42</span>]
+    ghci<span class="fu">&gt;</span> lostNumbers
+    [<span class="dv">4</span>,<span class="dv">8</span>,<span class="dv">15</span>,<span class="dv">16</span>,<span class="dv">23</span>,<span class="dv">42</span>]</code></pre>
+<p>Note: in GHCI, use <code>let</code> to make definitions (you can't define functions, even those with no parameters).</p>
+<p>Common list operations:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>] <span class="fu">++</span> [<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]                <span class="co">-- list concatenation</span>
+    [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]
+    ghci<span class="fu">&gt;</span> <span class="dv">7</span> <span class="fu">:</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]                 <span class="co">-- prepend element</span>
+    [<span class="dv">7</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]
+    ghci<span class="fu">&gt;</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>] <span class="fu">++</span> [<span class="dv">7</span>]              <span class="co">-- append element</span>
+    [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>]
+    ghci<span class="fu">&gt;</span> [<span class="fl">9.4</span>,<span class="fl">33.2</span>,<span class="fl">96.2</span>,<span class="fl">11.2</span>,<span class="fl">23.25</span>] <span class="fu">!!</span> <span class="dv">1</span>   <span class="co">-- index (origin 0)</span>
+    <span class="fl">33.2</span></code></pre>
+<p>Concatenation (and append) involve traversing the list whereas prepend does not. The latter is therefore preferred.</p>
+<p>The list syntax is simply syntactic sugar:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    gchi <span class="fu">&gt;</span> <span class="dv">1</span><span class="fu">:</span><span class="dv">2</span><span class="fu">:</span><span class="dv">3</span><span class="fu">:</span>[]
+    [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]</code></pre>
+<p>Strings are simply lists with more syntactic sugar:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="ch">&#39;A&#39;</span><span class="fu">:</span><span class="st">&quot; SMALL CAT&quot;</span>
+    <span class="st">&quot;A SMALL CAT&quot;</span></code></pre>
+<p>Lists may contain lists. The contained lists need not be of the same length but must be of the same type.</p>
+<p>Lists may be compared if their contents may be compared. The comparison is lexicographical (even on numbers !).</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> [<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">2</span>] <span class="fu">&gt;</span> [<span class="dv">3</span>,<span class="dv">4</span>]
+    <span class="kw">True</span></code></pre>
+<p>Commonly used list functions:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">head</span> [<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    <span class="dv">5</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">tail</span> [<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    [<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    ghci<span class="fu">&gt;</span> <span class="fu">last</span> [<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    <span class="dv">1</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">init</span> [<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    [<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>]
+    ghci<span class="fu">&gt;</span> <span class="fu">length</span> [<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    <span class="dv">5</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">null</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]
+    <span class="kw">False</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">null</span> []
+    <span class="kw">True</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">reverse</span> [<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>]
+    ghci<span class="fu">&gt;</span> <span class="fu">take</span> <span class="dv">3</span> [<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    [<span class="dv">5</span>,<span class="dv">4</span>,<span class="dv">3</span>]
+    ghci<span class="fu">&gt;</span> <span class="fu">drop</span> <span class="dv">3</span> [<span class="dv">8</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">6</span>]
+    [<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">6</span>]
+    ghci<span class="fu">&gt;</span> <span class="fu">minimum</span> [<span class="dv">8</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">6</span>]
+    <span class="dv">1</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">maximum</span> [<span class="dv">1</span>,<span class="dv">9</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>]
+    <span class="dv">9</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">sum</span> [<span class="dv">5</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">6</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">7</span>]
+    <span class="dv">31</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">product</span> [<span class="dv">6</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">2</span>]
+    <span class="dv">24</span>
+    ghci<span class="fu">&gt;</span> <span class="dv">4</span> <span class="ot">`elem`</span> [<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]
+    <span class="kw">True</span>
+    ghci<span class="fu">&gt;</span> <span class="dv">10</span> <span class="ot">`elem`</span> [<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>]
+    <span class="kw">False</span></code></pre>
+<h3 id="texas-ranges">Texas Ranges</h3>
+<p>Haskell has a range syntax:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> [<span class="dv">11</span><span class="fu">..</span><span class="dv">20</span>]
+    [<span class="dv">11</span>,<span class="dv">12</span>,<span class="dv">13</span>,<span class="dv">14</span>,<span class="dv">15</span>,<span class="dv">16</span>,<span class="dv">17</span>,<span class="dv">18</span>,<span class="dv">19</span>,<span class="dv">20</span>]
+    ghci<span class="fu">&gt;</span> [<span class="ch">&#39;a&#39;</span><span class="fu">..</span><span class="ch">&#39;z&#39;</span>]
+    <span class="st">&quot;abcdefghijklmnopqrstuvwxyz&quot;</span>
+    ghci<span class="fu">&gt;</span> [<span class="ch">&#39;K&#39;</span><span class="fu">..</span><span class="ch">&#39;Z&#39;</span>]
+    <span class="st">&quot;KLMNOPQRSTUVWXYZ&quot;</span></code></pre>
+<p>The syntax supports arithmetic progressions but beware the semantics:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> [<span class="dv">4</span>,<span class="dv">6</span><span class="fu">..</span><span class="dv">20</span>]             <span class="co">-- step 2</span>
+    [<span class="dv">4</span>,<span class="dv">6</span>,<span class="dv">8</span>,<span class="dv">10</span>,<span class="dv">12</span>,<span class="dv">14</span>,<span class="dv">16</span>,<span class="dv">18</span>,<span class="dv">20</span>]
+    ghci<span class="fu">&gt;</span> [<span class="dv">6</span>,<span class="dv">9</span><span class="fu">..</span><span class="dv">20</span>]             <span class="co">-- step 3</span>
+    [<span class="dv">6</span>,<span class="dv">9</span>,<span class="dv">12</span>,<span class="dv">15</span>,<span class="dv">18</span>]
+    ghci<span class="fu">&gt;</span> [<span class="dv">20</span>,<span class="dv">19</span><span class="fu">..</span><span class="dv">15</span>]           <span class="co">-- step -1</span>
+    [<span class="dv">20</span>,<span class="dv">19</span>,<span class="dv">18</span>,<span class="dv">17</span>,<span class="dv">16</span>,<span class="dv">15</span>]</code></pre>
+<p>Ranges on floating points numbers are support but may give surprising results so find another way.</p>
+<p>The syntax supports infinite lists:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> [<span class="dv">13</span>,<span class="dv">26</span><span class="fu">..</span><span class="dv">6</span><span class="fu">*</span><span class="dv">13</span>]         <span class="co">-- limit can be an expression</span>
+    [<span class="dv">13</span>,<span class="dv">26</span>,<span class="dv">39</span>,<span class="dv">52</span>,<span class="dv">65</span>,<span class="dv">78</span>]
+    ghci<span class="fu">&gt;</span> <span class="fu">take</span> <span class="dv">6</span> [<span class="dv">13</span>,<span class="dv">26</span><span class="fu">..</span>]      <span class="co">-- lazy evaluation to the rescue</span>
+    [<span class="dv">13</span>,<span class="dv">26</span>,<span class="dv">39</span>,<span class="dv">52</span>,<span class="dv">65</span>,<span class="dv">78</span>]</code></pre>
+<p>Functions to generate infinite lists include cycle, repeat but prefer replicate.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">take</span> <span class="dv">10</span> (<span class="fu">cycle</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>])
+    [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>]
+    ghci<span class="fu">&gt;</span> <span class="fu">take</span> <span class="dv">12</span> (<span class="fu">cycle</span> <span class="st">&quot;LOL &quot;</span>)
+    <span class="st">&quot;LOL LOL LOL</span>
+
+<span class="st">    ghci&gt; take 10 (repeat 5)</span>
+<span class="st">    [5,5,5,5,5,5,5,5,5,5]</span>
+<span class="st">    ghci&gt; replicate  10 5</span>
+<span class="st">    [5,5,5,5,5,5,5,5,5,5]</span></code></pre>
+<h3 id="im-a-list-comprehension">I'm a list comprehension</h3>
+<p>Mathematics has a notation for set comprehensions. The Haskell equivalent are list comprehensions.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> [x<span class="fu">*</span><span class="dv">2</span> <span class="fu">|</span> x <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>]]
+    [<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">6</span>,<span class="dv">8</span>,<span class="dv">10</span>,<span class="dv">12</span>,<span class="dv">14</span>,<span class="dv">16</span>,<span class="dv">18</span>,<span class="dv">20</span>]</code></pre>
+<p>Is simple to understand: for x in the range 1 to 10, yield twice x.</p>
+<p>Haskell supports a predicate syntax that allows the comprehension to be filtered:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> [x<span class="fu">*</span><span class="dv">2</span> <span class="fu">|</span> x <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], x<span class="fu">*</span><span class="dv">2</span> <span class="fu">&gt;=</span> <span class="dv">12</span>]
+    [<span class="dv">12</span>,<span class="dv">14</span>,<span class="dv">16</span>,<span class="dv">18</span>,<span class="dv">20</span>]
+    ghci<span class="fu">&gt;</span> [ x <span class="fu">|</span> x <span class="ot">&lt;-</span> [<span class="dv">50</span><span class="fu">..</span><span class="dv">100</span>], <span class="fu">mod</span> x <span class="dv">7</span> <span class="fu">==</span> <span class="dv">3</span>]
+    [<span class="dv">52</span>,<span class="dv">59</span>,<span class="dv">66</span>,<span class="dv">73</span>,<span class="dv">80</span>,<span class="dv">87</span>,<span class="dv">94</span>]</code></pre>
+<p>List comprehensions may have more than one predicate and more than one list (so you can generate permutations):</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> [ x <span class="fu">|</span> x <span class="ot">&lt;-</span> [<span class="dv">10</span><span class="fu">..</span><span class="dv">20</span>], x <span class="fu">/=</span> <span class="dv">13</span>, x <span class="fu">/=</span> <span class="dv">15</span>, x <span class="fu">/=</span> <span class="dv">19</span>]
+    [<span class="dv">10</span>,<span class="dv">11</span>,<span class="dv">12</span>,<span class="dv">14</span>,<span class="dv">16</span>,<span class="dv">17</span>,<span class="dv">18</span>,<span class="dv">20</span>]
+
+    ghci<span class="fu">&gt;</span> [ x<span class="fu">*</span>y <span class="fu">|</span> x <span class="ot">&lt;-</span> [<span class="dv">2</span>,<span class="dv">5</span>,<span class="dv">10</span>], y <span class="ot">&lt;-</span> [<span class="dv">8</span>,<span class="dv">10</span>,<span class="dv">11</span>]]
+    [<span class="dv">16</span>,<span class="dv">20</span>,<span class="dv">22</span>,<span class="dv">40</span>,<span class="dv">50</span>,<span class="dv">55</span>,<span class="dv">80</span>,<span class="dv">100</span>,<span class="dv">110</span>]</code></pre>
+<p>A bonkers calculation of the length of a list:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    length&#39; xs <span class="fu">=</span> <span class="fu">sum</span> [<span class="dv">1</span> <span class="fu">|</span> _ <span class="ot">&lt;-</span> xs]</code></pre>
+<p>where _ is a variable whose value is not used</p>
+<p>Since strings are lists, string comprehensions are possible:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="kw">let</span> removeNonUppercase st <span class="fu">=</span> [ c <span class="fu">|</span> c <span class="ot">&lt;-</span> st, c <span class="ot">`elem`</span> [<span class="ch">&#39;A&#39;</span><span class="fu">..</span><span class="ch">&#39;Z&#39;</span>]]
+    ghci<span class="fu">&gt;</span> removeNonUppercase <span class="st">&quot;IdontLIKEFROGS&quot;</span>
+    <span class="st">&quot;ILIKEFROGS&quot;</span></code></pre>
+<p>Note you can define list comprehensions in GHCI and use them like functions.</p>
+<p>List comprehensions may be nested:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="kw">let</span> xxs <span class="fu">=</span> [[<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">5</span>],[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>,<span class="dv">9</span>],[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">6</span>,<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">6</span>]]
+    ghci<span class="fu">&gt;</span> [ [ x <span class="fu">|</span> x <span class="ot">&lt;-</span> xs, <span class="fu">even</span> x ] <span class="fu">|</span> xs <span class="ot">&lt;-</span> xxs]
+    [[<span class="dv">2</span>,<span class="dv">2</span>,<span class="dv">4</span>],[<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">6</span>,<span class="dv">8</span>],[<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">2</span>,<span class="dv">6</span>,<span class="dv">2</span>,<span class="dv">6</span>]]</code></pre>
+<p>Inside functions, comprehensions may be written over several lines.</p>
+<h3 id="tuples">Tuples</h3>
+<p>Tuples are of fixed size (aka length) and may be heterogeneous. They are also types.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> (<span class="dv">1</span>,<span class="dv">2</span>)                 <span class="co">-- a pair</span>
+    (<span class="dv">1</span>,<span class="dv">2</span>)
+    ghci<span class="fu">&gt;</span> (<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>)               <span class="co">-- a triple</span>
+    (<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>)
+    ghci<span class="fu">&gt;</span> [(<span class="dv">1</span>,<span class="dv">2</span>),(<span class="dv">8</span>,<span class="dv">11</span>),(<span class="dv">4</span>,<span class="dv">5</span>)]  <span class="co">-- a triangle perhaps</span>
+    [(<span class="dv">1</span>,<span class="dv">2</span>),(<span class="dv">8</span>,<span class="dv">11</span>),(<span class="dv">4</span>,<span class="dv">5</span>)]</code></pre>
+<p>but these are invalid:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    [(<span class="dv">1</span>,<span class="dv">2</span>),(<span class="dv">8</span>,<span class="dv">11</span>,<span class="dv">5</span>),(<span class="dv">4</span>,<span class="dv">5</span>)]
+
+    [(<span class="dv">1</span>,<span class="dv">2</span>),(<span class="st">&quot;One&quot;</span>,<span class="dv">2</span>)]</code></pre>
+<p>It makes no sense in Haskell to have singleton tuples:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> (<span class="dv">1</span>) <span class="fu">==</span> <span class="dv">1</span>
+    <span class="kw">True</span></code></pre>
+<p>You may compare tuples if their components can be compared but you cannot compare tuples of different sizes.</p>
+<p>Functions that operate on pairs:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">fst</span> (<span class="dv">8</span>,<span class="dv">11</span>)
+    <span class="dv">8</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">fst</span> (<span class="st">&quot;Wow&quot;</span>, <span class="kw">False</span>)
+    <span class="st">&quot;Wow</span>
+<span class="st">    ghci&gt; snd (8,11)</span>
+<span class="st">    11</span>
+<span class="st">    ghci&gt; snd (&quot;</span><span class="dt">Wow</span><span class="st">&quot;, False)</span>
+<span class="st">    False</span></code></pre>
+<p>The zip function can take two lists and produce a list of pairs:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">zip</span> [<span class="dv">1</span> <span class="fu">..</span> <span class="dv">5</span>] [<span class="st">&quot;one&quot;</span>, <span class="st">&quot;two&quot;</span>, <span class="st">&quot;three&quot;</span>, <span class="st">&quot;four&quot;</span>, <span class="st">&quot;five&quot;</span>]
+    [(<span class="dv">1</span>,<span class="st">&quot;one&quot;</span>),(<span class="dv">2</span>,<span class="st">&quot;two&quot;</span>),(<span class="dv">3</span>,<span class="st">&quot;three&quot;</span>),(<span class="dv">4</span>,<span class="st">&quot;four&quot;</span>),(<span class="dv">5</span>,<span class="st">&quot;five&quot;</span>)]
+
+    ghci<span class="fu">&gt;</span> <span class="fu">zip</span> [<span class="dv">1</span><span class="fu">..</span>] [<span class="st">&quot;apple&quot;</span>, <span class="st">&quot;orange&quot;</span>, <span class="st">&quot;cherry&quot;</span>, <span class="st">&quot;mango&quot;</span>]
+    [(<span class="dv">1</span>,<span class="st">&quot;apple&quot;</span>),(<span class="dv">2</span>,<span class="st">&quot;orange&quot;</span>),(<span class="dv">3</span>,<span class="st">&quot;cherry&quot;</span>),(<span class="dv">4</span>,<span class="st">&quot;mango&quot;</span>)]</code></pre>
+<p>Since the longer list is truncated, zip works well with infinite lists.</p>
+<h3 id="an-exercise">An Exercise</h3>
+<p>Find all right triangles with a perimeter of 24 that have integers for all sides and all sides are equal to or smaller than 10.</p>
+<p>All triangles with sides equal to or smaller than 10:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="kw">let</span> triangles <span class="fu">=</span> [ (a,b,c) <span class="fu">|</span> c <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], b <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span>c], a <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span>b] ]</code></pre>
+<p>All that are right triangles.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="kw">let</span> rightTriangles <span class="fu">=</span> [ (a,b,c) <span class="fu">|</span> c <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], b <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span>c], a <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span>b], a<span class="fu">^</span><span class="dv">2</span> <span class="fu">+</span> b<span class="fu">^</span><span class="dv">2</span> <span class="fu">==</span> c<span class="fu">^</span><span class="dv">2</span>]</code></pre>
+<p>All that have a perimeter of 24.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="kw">let</span> rightTriangles&#39; <span class="fu">=</span> [ (a,b,c) <span class="fu">|</span> c <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>], b <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span>c], a <span class="ot">&lt;-</span> [<span class="dv">1</span><span class="fu">..</span>b], a<span class="fu">^</span><span class="dv">2</span> <span class="fu">+</span> b<span class="fu">^</span><span class="dv">2</span> <span class="fu">==</span> c<span class="fu">^</span><span class="dv">2</span>, a<span class="fu">+</span>b<span class="fu">+</span>c <span class="fu">==</span> <span class="dv">24</span>]
+
+    ghci<span class="fu">&gt;</span> rightTriangles&#39;
+    [(<span class="dv">6</span>,<span class="dv">8</span>,<span class="dv">10</span>)]</code></pre>
+</body>
+</html>
+
+

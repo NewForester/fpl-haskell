@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- haskell notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    <title>
+Learn You A Haskell Notes: Types and Typeclasses
+</title>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Haskell programming language made while learning a bit about Functional Programming" /> <meta name="keywords" content="Haskell" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="../styles/style-sheet.css" />
+</head>
+
+<body>
+
+<h1 id="learn-you-a-haskell">Learn You A Haskell</h1>
+<h2 id="types-and-typeclasses">Types and Typeclasses</h2>
+<p>This chapter introduces Haskell <code>types</code>, <code>type variables</code> and <code>typeclasses</code>.</p>
+<p>The first will be familiar from statically types imperative languages but are largely optional because of Haskell's type inference.</p>
+<p>The second are very useful for generic programming.</p>
+<p>The third are not objects but something altogether more intriguing.</p>
+<h3 id="types">Types</h3>
+<p>Haskell has a static type system that means the compiler knows the type of every expression and will reject expressions with type errors avoiding a very common class of run time error associated with dynamic type systems.</p>
+<p>Haskell has type interference: you write a number and Haskell can tell it is a number and take it from there. It does not need to programmer to tell it that 1 is a number.</p>
+<p>Use <code>:t</code> to view the type of an expression:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="ch">&#39;a&#39;</span>
+    <span class="ch">&#39;a&#39;</span><span class="ot"> ::</span> <span class="dt">Char</span>                         <span class="co">-- note the capital letter denotes a type</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="kw">True</span>
+    <span class="kw">True</span><span class="ot"> ::</span> <span class="dt">Bool</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="st">&quot;HELLO!&quot;</span>
+    <span class="st">&quot;HELLO!&quot;</span><span class="ot"> ::</span> [<span class="dt">Char</span>]                  <span class="co">-- list of Char (or String)</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t (<span class="kw">True</span>, <span class="ch">&#39;a&#39;</span>)
+    (<span class="kw">True</span>, <span class="ch">&#39;a&#39;</span>)<span class="ot"> ::</span> (<span class="dt">Bool</span>, <span class="dt">Char</span>)         <span class="co">-- tuples are types</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="dv">4</span> <span class="fu">==</span> <span class="dv">5</span>
+    <span class="dv">4</span> <span class="fu">==</span> <span class="dv">5</span><span class="ot"> ::</span> <span class="dt">Bool</span>                      <span class="co">-- expressions have a type</span></code></pre>
+<p>Functions have types. Giving functions (except for very short ones) explicit types (not quite what you think) is generally considered good form.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    removeNonUppercase ::</span> [<span class="dt">Char</span>] <span class="ot">-&gt;</span> [<span class="dt">Char</span>]      <span class="co">-- takes a list of Char and returns a list of Char</span>
+    removeNonUppercase st <span class="fu">=</span> [ c <span class="fu">|</span> c <span class="ot">&lt;-</span> st, c <span class="ot">`elem`</span> [<span class="ch">&#39;A&#39;</span><span class="fu">..</span><span class="ch">&#39;Z&#39;</span>]]
+
+<span class="ot">    addThree ::</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span>        <span class="co">-- takes three Ints and returns and Int</span>
+    addThree x y z <span class="fu">=</span> x <span class="fu">+</span> y <span class="fu">+</span> z</code></pre>
+<p>Some common types are:</p>
+<ul>
+<li>Int - fixed width integer, usually 32 bits</li>
+<li>Integer - integer of unlimited range</li>
+<li>Float - single precision real number</li>
+<li>Double - double precision real number</li>
+<li>Bool - True or False</li>
+<li>Char - a character (enclosed in single quotes)</li>
+<li>String - a list of characters (enclosed in double quotes)</li>
+</ul>
+<h3 id="type-variables">Type Variables</h3>
+<p>What is the type of the head function ?</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="fu">head</span>
+<span class="ot">    head ::</span> [a] <span class="ot">-&gt;</span> a</code></pre>
+<p>Ah ! The function takes a list of type <code>a</code> and return a value of type <code>a</code>. Irrespective of what type <code>a</code> is.</p>
+<p>Another example:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="fu">fst</span>
+<span class="ot">    fst ::</span> (a, b) <span class="ot">-&gt;</span> a</code></pre>
+<p>Ah ! It takes a pair of goodness knows what and returns a value which the same type as the first element of the pair.</p>
+<p>Not only is it possible to infer the type of a function, for really short function it is possible to infer the function from its type definition!</p>
+<h3 id="typeclass-101">Typeclass 101</h3>
+<p>A types class is (a sort of) interface that defines some behaviour. For a type to belong to a typeclass, it must implement the behaviour defined by the typeclass.</p>
+<p>Waddayamean ?</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t (<span class="fu">==</span>)
+<span class="ot">    (==) ::</span> (<span class="kw">Eq</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Bool</span></code></pre>
+<p>What this is saying is that the type of <code>a</code> must belong to the typeclass <code>Eq</code>. This is, type <code>a</code> must support the equals and not equals functions.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="fu">elem</span>
+<span class="ot">    elem ::</span> <span class="kw">Eq</span> a <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> <span class="dt">Bool</span></code></pre>
+<p>This says pretty much the same thing but in a machine readable form (equivalent to the documentation in C++ that says a class must implement the operator==).</p>
+<p>Some common typeclasses:</p>
+<ul>
+<li>Eq - for types that support equality (they support = and /=)</li>
+<li>Ord - for types with an ordering (they support &lt;, &lt;=, &gt;=, &gt; and compare)</li>
+<li>Enum - for types with a sequential ordering (they support succ and pred)</li>
+<li>Bounded - for types have have and upper and lower bound (they support minBound and maxBound)</li>
+<li>Num - for numeric types</li>
+<li>Integral - for integer number types (Int and Integer)</li>
+<li>Floating - for real numbers (Float and Double)</li>
+<li>Show - for types that can be presented as strings (printable - they support show)</li>
+<li>Read - for types that can convert from a string to their internal representation (they support read)</li>
+</ul>
+<p>Some simple examples:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="st">&quot;Ho Ho&quot;</span> <span class="fu">==</span> <span class="st">&quot;Ho Ho&quot;</span>
+    <span class="kw">True</span>
+    ghci<span class="fu">&gt;</span> <span class="dv">5</span> <span class="ot">`compare`</span> <span class="dv">3</span>             <span class="co">-- enum LT,EQ,GT</span>
+    <span class="kw">GT</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">succ</span> <span class="ch">&#39;B&#39;</span>
+    <span class="ch">&#39;C&#39;</span>
+    ghci<span class="fu">&gt;</span><span class="ot"> maxBound ::</span> <span class="dt">Bool</span>          <span class="co">-- maxBound appears to be a polymorphic constant</span>
+    <span class="kw">True</span>
+    ghci<span class="fu">&gt;</span> <span class="dv">20</span><span class="ot"> ::</span> <span class="dt">Float</span>               <span class="co">-- numbers also appear to be polymorphic constants</span>
+    <span class="fl">20.0</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">show</span> <span class="fl">5.334</span>
+    <span class="st">&quot;5.334&quot;</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">read</span> <span class="st">&quot;[1,2,3,4]&quot;</span> <span class="fu">++</span> [<span class="dv">3</span>]   <span class="co">-- its a girl no sorry, its a list</span>
+    [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">3</span>]</code></pre>
+<p>How is this of any use ?</p>
+<p>Well consider ...</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="fu">read</span>
+<span class="ot">    read ::</span> <span class="kw">Read</span> a <span class="ot">=&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> a</code></pre>
+<p>is nice and generic and in the example above the compiler could deduce what type <code>a</code> needed to be.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> (<span class="fu">read</span> <span class="st">&quot;5&quot;</span><span class="ot"> ::</span> <span class="dt">Float</span>)       <span class="co">-- type annotation to say its Float</span>
+    <span class="fl">5.0</span></code></pre>
+<p>Type annotations are a bit like casts in C/C++ (but are not used to suppress warning messages indiscriminately).</p>
+<p>On the other hand:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="fu">length</span>
+<span class="ot">    length ::</span> [a] <span class="ot">-&gt;</span> <span class="dt">Int</span></code></pre>
+<p>Is not generic (possible for histerical reasons). To avoid type errors, look to fromInteger:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">fromIntegral</span> (<span class="fu">length</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>]) <span class="fu">+</span> <span class="fl">3.2</span>
+    <span class="fl">7.2</span></code></pre>
+</body>
+</html>
+
+

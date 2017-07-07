@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- haskell notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    <title>
+Learn You A Haskell Notes: Recursion
+</title>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Haskell programming language made while learning a bit about Functional Programming" /> <meta name="keywords" content="Haskell" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="../styles/style-sheet.css" />
+</head>
+
+<body>
+
+<h1 id="learn-you-a-haskell">Learn You A Haskell</h1>
+<h2 id="recursion">Recursion</h2>
+<p>Recursion is core to Functional Programming languages: it is one of the two looping constructs.</p>
+<p>While many other languages emphasise tail recursion, which offers scope for optimisation, this chapter does not. Thinking about this, you cannot do tail recursion on infinite lists and Haskell is the first language to handle infinite lists explicitly.</p>
+<p>Another thought is that Haskell implements lazy evaluation while Erlang and others do not. With lazy evaluation perhaps recursion is merely a syntax and not an implementation. In which case tail recursion optimisation may be moot.</p>
+<p>The chapter is largely examples with explanations. The code examples may all be found in <a href="../learn-you-a-haskell/recursion.hs">Recursion Examples</a>.</p>
+<p>The chapter wraps up with suggestions on a general approach to thinking recursively.</p>
+<h3 id="hello-recursion">Hello recursion !</h3>
+<p>Recursion is important in Haskell because the idea is to state what something is rather than how you get it. The idea is borrowed from mathematics. The Fibonacci series is a good example:</p>
+<pre class="maths"><code>    F(0) = 0
+    F(1) = 1
+    F(n) =  F(n-1) + F(n-2)</code></pre>
+<p>There are two edge conditions for the first two numbers in the series but the rest of the series are defined recursively in terms of their predecessors.</p>
+<h3 id="maximum-awesome">Maximum Awesome</h3>
+<p>See the <code>maximum</code> and <code>max</code> code examples. The points to note here is that the maximum for the whole list is the maximum of the list's head and tail and that the maximum of the tail can conveniently be calculated using recursion: the function calls itself.</p>
+<h3 id="a-few-more-recursive-functions">A few more recursive functions</h3>
+<p>See the <code>replicate</code> code example. The edge case is 0, (&lt;= 0 is simply defensive) and the recursion in the otherwise clause works towards 0.</p>
+<p>See the <code>take</code> code example. There is an edge case on the first parameter and another on the second and these require different patterns. The recursion is therefore matched by the third pattern. It follows the standard list pattern.</p>
+<p>See the <code>reverse</code> and <code>repeat</code> code examples.</p>
+<p>The first has no accumulator and is not tail recursive and one might wonder why. The second has no edge condition because it can produce an infinite list.</p>
+<p>If you think about it, does lazy evaluation not mean recursive routines are not actually calling themselves ? Interesting thought.</p>
+<p>See the <code>zip</code> code example. The function takes two parameters and naturally each has a edge case. The zipping stops when the shorter of the two parameters is exhausted.</p>
+<h3 id="quick-sort">Quick, sort !</h3>
+<p>Quicksort is an amazingly compact algorithm in most languages but even more so in Haskell. It is considered 'cheesy' by Haskell programmers because it has be used too often.</p>
+<p>From any description of the quicksort it should clear that the recursion will involve the routine calling itself twice. See the <code>quicksort</code> code example. It does not look particularly efficient to a C programmer.</p>
+<h3 id="thinking-recursively">Thinking recursively</h3>
+<p>There is a pattern to thinking recursively that means it is not as difficult as it might seem at first.</p>
+<p>There is something repetitive - that is rather like the body of a loop.</p>
+<p>There are edge cases - these are rather like the end (sometimes the start) conditions of a loop.</p>
+<p>There are the new parameters for the recursion - these are analogous to loop reinitialisation.</p>
+<p>The non-trivial routine deals with some element of the problem and passes the rest down to itself in order to work on the next element of the problem until an edge case is encountered.</p>
+<p>All routines return a value. It is useful to think of this as the accumulator or the result so far. As results are passed back they are often combined with the element at the level above.</p>
+<p>The edge case is often an identity - 0 or 1, for example, or an empty list.</p>
+<p>This is the scheme of things whether dealing with numerical sequences, lists, trees or any other (recursive) data structure.</p>
+<p>One difference (depending on how you code) with numerical sequences may be counting down towards an edge case rather than counting up to some arbitrary boundary. This is perhaps less important with Haskell and its lazy evaluation.</p>
+<p>With lists you usually keep the head and pass the tail down and the edge case is an empty list.</p>
+</body>
+</html>
+
+

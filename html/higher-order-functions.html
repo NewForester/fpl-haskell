@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- haskell notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    <title>
+Learn You A Haskell Notes: Higher Order Functions
+</title>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Haskell programming language made while learning a bit about Functional Programming" /> <meta name="keywords" content="Haskell" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="../styles/style-sheet.css" />
+</head>
+
+<body>
+
+<h1 id="learn-you-a-haskell">Learn You A Haskell</h1>
+<h2 id="higher-order-functions">Higher Order Functions</h2>
+<p>In Haskell a function may take another function as a parameter or return a function. Functions that do so are called <code>higher order functions</code>.</p>
+<p>This puts functions on a par with data.</p>
+<p>In Haskell this is taken to the extreme. It uses currying heavily (no mention of closures).</p>
+<p>The chapter leaps straight into <code>currying</code>, which may seem strange until you realise currying is central to Haskell thinking and not merely an interesting consequence.</p>
+<p>Partial application of functions, function composition and anonymous <code>lambda</code> functions are covered as is function application with $ instead of <space>.</p>
+<p>The chapter covers <code>map</code> and <code>filter</code>, the bread and butter of functional programming, and later fold and scan in some detail. The examples make <code>currying</code> and <code>partial application</code> of functions look natural.</p>
+<h3 id="curried-functions">Curried Functions</h3>
+<p>Officially, every function in Haskell takes only one parameter. A function that appears to take two parameters is in fact a function that takes one (the first) parameter and returns a function that takes the other (second) parameter.</p>
+<p>A function that takes several parameters is converted into a sequence of functions that each take only one parameter by a process known as <code>currying</code>.</p>
+<p>That is, at one level, all there is to it. The process of currying is named after Haskell Curry, the logician after who the language is also named.</p>
+<p>In terms of Haskell syntax, the following are equivalent:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">max</span> <span class="dv">4</span> <span class="dv">5</span>
+    <span class="dv">5</span>
+    ghci<span class="fu">&gt;</span>(<span class="fu">max</span> <span class="dv">4</span>) <span class="dv">5</span>
+    <span class="dv">5</span></code></pre>
+<p>In the first (more common) form the space is an operator named <code>function application</code>. It quite simply has the highest order of precedence.</p>
+<p>The type declaration of <code>max</code> can also be written two ways:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    max ::</span> (<span class="kw">Ord</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a
+<span class="ot">    max ::</span> (<span class="kw">Ord</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span>(a <span class="ot">-&gt;</span> a)</code></pre>
+<p>The second declaration reads: &quot;max is a function that takes an <code>a</code> and returns a function that takes an <code>a</code> and returns an <code>a</code>&quot;.</p>
+<p>Note the parentheses in a type declaration have a different significance: on the left of -&gt; is the parameter and on the right is the return.</p>
+<p>Consider next:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    multiplyThreeNumbers ::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a
+    multiplyThreeNumbers x y z <span class="fu">=</span> x <span class="fu">*</span> y <span class="fu">*</span> z</code></pre>
+<p>Conventional wisdom says this is a function that takes three (numeric) parameters a multiplies then together.</p>
+<p>Haskell wisdom says this is a function that takes a number and returns a function that takes a second number and multiplies it with the first and returns another function that takes the third number and multiplies it with the result so far.</p>
+<p>If insufficient parameters are passed to the routine, another function on the fly is created on-the-fly:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="kw">let</span> multiplyTwoNumbersByNine <span class="fu">=</span> multiplyThreeNumbers <span class="dv">9</span>
+    ghci<span class="fu">&gt;</span> <span class="kw">let</span> multiplyByEighteen <span class="fu">=</span> multiplyTwoNumbersByNine <span class="dv">2</span></code></pre>
+<p>This simple example may not look very useful but really useful examples may not be all that simple.</p>
+<p>Here's one more:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    compareWithOneHundred ::</span> (<span class="kw">Num</span> a, <span class="kw">Ord</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Ordering</span>
+    compareWithOneHundred x <span class="fu">=</span> <span class="fu">compare</span> x <span class="dv">100</span></code></pre>
+<p>This process is called <code>partial application</code>. The language's infix functions can also be applied partially by using <code>sections</code>. Remember that infix function can be used as an ordinary function by using parentheses ... so voilá:</p>
+<pre class="haskel"><code>    ghci&gt; let divideByTen = (/10)
+    ghci&gt; divideByTen 200
+    20.0
+    ghci&gt; let divideIntoOneHundred = (100/)
+    ghci&gt; divideIntoOneHundred 25
+    4.0</code></pre>
+<p>Note that <code>(-4)</code> means 'minus four'. Oops. Use <code>(subtract 4)</code> instead.</p>
+<p>xxxx EXPLAIN the missing parameter sum'' = foldl (+) 0</p>
+<p>Functions do not belong to the Show typeclass so if you mess up your partial application in GHCI you will very likely get an exception that complains about a use of <code>print</code> when you have not typed print.</p>
+<h3 id="some-higher-orderism-is-in-order">Some higher-orderism is in order</h3>
+<p>Functions may take functions as parameters:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    applyTwice ::</span> (a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a
+    applyTwice f x <span class="fu">=</span> f (f x)</code></pre>
+<p>The parentheses in the type declaration indicate the first parameter is a function that takes and returns an <code>a</code>.</p>
+<p>Now watch the magic as this new function is used with partially applied functions:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> applyTwice (<span class="fu">+</span><span class="dv">3</span>) <span class="dv">10</span>
+    <span class="dv">16</span>
+    ghci<span class="fu">&gt;</span> applyTwice (<span class="fu">++</span> <span class="st">&quot; HAHA&quot;</span>) <span class="st">&quot;HEY&quot;</span>
+    <span class="st">&quot;HEY HAHA HAHA&quot;</span>
+    ghci<span class="fu">&gt;</span> applyTwice (<span class="st">&quot;HAHA &quot;</span> <span class="fu">++</span>) <span class="st">&quot;HEY&quot;</span>
+    <span class="st">&quot;HAHA HAHA HEY&quot;</span>
+    ghci<span class="fu">&gt;</span> applyTwice (<span class="dv">3</span><span class="fu">:</span>) [<span class="dv">1</span>]
+    [<span class="dv">3</span>,<span class="dv">3</span>,<span class="dv">1</span>]</code></pre>
+<p>Higher order functions are very versatile. Here is an implementation of the standard library <code>zipwith</code> function that looks a lot like map(f,a,b) in Python.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    zipWith&#39; ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b] <span class="ot">-&gt;</span> [c]
+    zipWith&#39; _ [] _ <span class="fu">=</span> []
+    zipWith&#39; _ _ [] <span class="fu">=</span> []
+    zipWith&#39; f (x<span class="fu">:</span>xs) (y<span class="fu">:</span>ys) <span class="fu">=</span> f x y <span class="fu">:</span> zipWith&#39; f xs ys</code></pre>
+<p>Again, watch the magic:</p>
+<p><code>haskell     ghci&gt; zipWith' (+) [4,2,5,6] [2,6,2,3]     [6,8,7,9]     ghci&gt; zipWith' min [6,3,2,1] [7,3,1,5]     [6,3,1,1]     ghci&gt; zipWith' (zipWith' (*)) [[1,2,3],[3,5,6],[2,3,4]] [[3,2,2],[3,4,5],[5,4,3]]     [[3,4,6],[9,20,30],[10,12,12]]</code>*)</p>
+<p>Another function in the standard library is <code>flip</code>. It takes a function and returns another that accepts the functions first two parameters in reverse order.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    flip&#39; ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (b <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> c)
+    flip&#39; f <span class="fu">=</span> g
+        <span class="kw">where</span> g x y <span class="fu">=</span> f y x</code></pre>
+<p>I can see why what is declared says the right thing but do not quite grasp how the Haskell compiler complies it. Perhaps it all comes back to currying</p>
+<p>An alternative way of writing this is:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    flip&#39;&#39; ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> (b <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> c)
+    flip&#39;&#39; f y x <span class="fu">=</span> f x y</code></pre>
+<p>[ed: Now I am lost.]</p>
+<h3 id="maps-and-filters-here">Maps and Filters = HERE</h3>
+<p>The bread and butter of functional programming are <code>map</code> and <code>filter</code>. They are alternatives to list comprehensions.</p>
+<p>A <code>map</code> takes a function and applies it to every element in a list producing a new list.</p>
+<p>Note: it is not just lists - other recursive data structures such as trees have an analogous function.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    map&#39; ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]
+    map&#39; _ [] <span class="fu">=</span> []
+    map&#39; f (x<span class="fu">:</span>xs) <span class="fu">=</span> f x <span class="fu">:</span> map&#39; f xs</code></pre>
+<p>Watch the magic:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> map&#39; (<span class="fu">+</span><span class="dv">3</span>) [<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">6</span>]
+    [<span class="dv">4</span>,<span class="dv">8</span>,<span class="dv">6</span>,<span class="dv">4</span>,<span class="dv">9</span>]
+    ghci<span class="fu">&gt;</span> map&#39; (map&#39; (<span class="fu">^</span><span class="dv">2</span>)) [[<span class="dv">1</span>,<span class="dv">2</span>],[<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>],[<span class="dv">7</span>,<span class="dv">8</span>]]
+    [[<span class="dv">1</span>,<span class="dv">4</span>],[<span class="dv">9</span>,<span class="dv">16</span>,<span class="dv">25</span>,<span class="dv">36</span>],[<span class="dv">49</span>,<span class="dv">64</span>]]
+    ghci<span class="fu">&gt;</span> map&#39; <span class="fu">fst</span> [(<span class="dv">1</span>,<span class="dv">2</span>),(<span class="dv">3</span>,<span class="dv">5</span>),(<span class="dv">6</span>,<span class="dv">3</span>),(<span class="dv">2</span>,<span class="dv">6</span>),(<span class="dv">2</span>,<span class="dv">5</span>)]
+    [<span class="dv">1</span>,<span class="dv">3</span>,<span class="dv">6</span>,<span class="dv">2</span>,<span class="dv">2</span>]</code></pre>
+<p>A <code>filter</code> takes a predicate and a list and returns a new list containing the elements of the first list for which the predicate is true.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    filter&#39; ::</span> (a <span class="ot">-&gt;</span> <span class="dt">Bool</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+    filter&#39; _ [] <span class="fu">=</span> []
+    filter&#39; p (x<span class="fu">:</span>xs)
+        <span class="fu">|</span> p x           <span class="fu">=</span> x <span class="fu">:</span> filter&#39; p xs
+        <span class="fu">|</span> <span class="fu">otherwise</span>     <span class="fu">=</span> filter&#39; p xs</code></pre>
+<p>Watch the magic:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> filter&#39; (<span class="fu">&gt;</span><span class="dv">3</span>) [<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">6</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    [<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">4</span>]
+    ghci<span class="fu">&gt;</span> filter&#39; <span class="fu">even</span> [<span class="dv">1</span><span class="fu">..</span><span class="dv">10</span>]
+    [<span class="dv">2</span>,<span class="dv">4</span>,<span class="dv">6</span>,<span class="dv">8</span>,<span class="dv">10</span>]
+    ghci<span class="fu">&gt;</span> <span class="kw">let</span> notNull x <span class="fu">=</span> <span class="fu">not</span> (<span class="fu">null</span> x) <span class="kw">in</span> filter&#39; notNull [[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>],[],[<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>],[<span class="dv">2</span>,<span class="dv">2</span>],[],[],[]]
+    [[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>],[<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>],[<span class="dv">2</span>,<span class="dv">2</span>]]</code></pre>
+<p>A list comprehension may be used as an alternative to both map and filter:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">map</span> (<span class="fu">+</span><span class="dv">3</span>) [<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">6</span>]
+    [<span class="dv">4</span>,<span class="dv">8</span>,<span class="dv">6</span>,<span class="dv">4</span>,<span class="dv">9</span>]
+    ghci<span class="fu">&gt;</span> [x<span class="dv">+3</span> <span class="fu">|</span> x <span class="ot">&lt;-</span> [<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">1</span>,<span class="dv">6</span>]]
+    [<span class="dv">4</span>,<span class="dv">8</span>,<span class="dv">6</span>,<span class="dv">4</span>,<span class="dv">9</span>]
+
+    ghci<span class="fu">&gt;</span> <span class="fu">filter</span> (<span class="fu">&gt;</span><span class="dv">3</span>) [<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">6</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    [<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">4</span>]
+    ghci<span class="fu">&gt;</span> [x <span class="fu">|</span> x <span class="ot">&lt;-</span> [<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">6</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>], x <span class="fu">&gt;</span> <span class="dv">3</span>]
+    [<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">4</span>]</code></pre>
+<p>The filter equivalent of several predicates is applying several filters in series or joining the predicates with &amp;&amp; but the predicates may be easier to read.</p>
+<p>A map-with-filter may be easier to read as a list comprehension. Nested list maps may be easier to read as nested comprehensions.</p>
+<p>You can even combine the two:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> [x <span class="fu">|</span> x <span class="ot">&lt;-</span> <span class="fu">map</span> (<span class="fu">+</span><span class="fl">0.5</span>) [<span class="dv">1</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>,<span class="dv">6</span>,<span class="dv">4</span>,<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>], x <span class="fu">&gt;</span> <span class="dv">3</span>]
+    [<span class="fl">5.5</span>,<span class="fl">3.5</span>,<span class="fl">6.5</span>,<span class="fl">4.5</span>,<span class="fl">3.5</span>]</code></pre>
+<p>The choice is yours.</p>
+<p>The old quicksort chestnut can be expressed using filters:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    quicksort ::</span> (<span class="kw">Ord</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+    quicksort [] <span class="fu">=</span> []
+    quicksort (x<span class="fu">:</span>xs) <span class="fu">=</span> quicksort (<span class="fu">filter</span> (<span class="fu">&lt;=</span>x) xs) <span class="fu">++</span> [x] <span class="fu">++</span> quicksort (<span class="fu">filter</span> (<span class="fu">&gt;</span>x) xs)</code></pre>
+<p>but once again this illustrates clarity and not necessary efficiency.</p>
+<p>This section wraps up with an illustration of applying a function partially using map to produce a list of functions:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    <span class="fu">map</span> (<span class="fu">+</span>) [<span class="dv">0</span> <span class="fu">...</span>]</code></pre>
+<p>I thought this would lead to an illustration of how map can be used to map a function that takes two parameters over a list but I don't think it did.</p>
+<p>[ed: Now I am lost again.]</p>
+<h4 id="collatz-sequences">Collatz Sequences</h4>
+<p>Collatz sequences are generated from a seed by dividing even numbers by 2 and by multiplying odd numbers by 3 and adding 1. The chain finishes with 1. The theory is that all sequences finish (there are no infinite series).</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    chain ::</span> (<span class="kw">Integral</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> [a]
+    chain <span class="dv">1</span> <span class="fu">=</span> [<span class="dv">1</span>]
+    chain n
+        <span class="fu">|</span> <span class="fu">even</span> n    <span class="fu">=</span> n <span class="fu">:</span> chain (<span class="fu">div</span> n <span class="dv">2</span>)
+        <span class="fu">|</span> <span class="fu">odd</span> n     <span class="fu">=</span> n <span class="fu">:</span> chain (n <span class="fu">*</span> <span class="dv">3</span> <span class="fu">+</span> <span class="dv">1</span>)</code></pre>
+<p>So, the question is ... for all starting numbers between 1 and 100, how many chains have a length greater that 15 ?</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="kw">let</span> isLong xs <span class="fu">=</span> <span class="fu">length</span> xs <span class="fu">&gt;</span> <span class="dv">15</span> <span class="kw">in</span> <span class="fu">length</span> (<span class="fu">filter</span> isLong (<span class="fu">map</span> chain [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]))</code></pre>
+<h3 id="lamdas">Lamdas</h3>
+<p>Lambdas are anonymous functions. They are expressions and so can be used anywhere but are usually parameters to a higher order function.</p>
+<p>They are usually about the same length as function named in let ... in expression or where ... clauses. Here they are alternatives and you are free to use whichever clearly conveys your reasoning.</p>
+<p>The final expression from the previous section may be expressed as:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">length</span> (<span class="fu">filter</span> (\xs <span class="ot">-&gt;</span> <span class="fu">length</span> xs <span class="fu">&gt;</span> <span class="dv">15</span>) (<span class="fu">map</span> chain [<span class="dv">1</span><span class="fu">..</span><span class="dv">100</span>]))</code></pre>
+<p>A lambda function is introduced by  (standing in for λ). This is followed by a list of parameters then -&gt; followed by the body of the function. The whole thing is usually enclosed in parentheses in order to make it clear (to the compiler) where it ends.</p>
+<p>Lamdas do not have type declaration. They can take any number of parameters. They may take one guard pattern but they can only have one pattern: if the pattern is not matched, an exception is thrown.</p>
+<p>Do not over use lambdas: <code>(+3)</code> and <code>(\x -&gt; x + 3)</code> are equivalent but the first form is to be preferred.</p>
+<p>Lambdas can be used to illustrate currying:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    addThree ::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a
+    addThree x y z <span class="fu">=</span> x <span class="fu">+</span> y <span class="fu">+</span> z
+
+<span class="ot">    addThree&#39; ::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a
+    addThree&#39; <span class="fu">=</span> \x <span class="ot">-&gt;</span> \y <span class="ot">-&gt;</span> \z <span class="ot">-&gt;</span> x <span class="fu">+</span> y <span class="fu">+</span> z</code></pre>
+<p>are equivalent.</p>
+<p>The tutorial also suggests that:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    flip&#39; ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> c) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> c
+    flip&#39; f <span class="fu">=</span> \x y <span class="ot">-&gt;</span> f y x</code></pre>
+<p>conveys the intent best.</p>
+<p>This is apparently because <code>flip</code> is usually bound with some other function and the result passed to map or filter, which is odd because these last two take only one parameter. Anyway , the tutorial recommends lambdas should be used in this way to suggest explicitly that the function is meant to be partially applied and then passed to some other higher order function.</p>
+<p>[ed: Now I am lost yet again.]</p>
+<p>Perhaps it means that <code>partical application</code> of the first parameter to a function before passing it to map or filter just works but to bind the second parameter you need flip.</p>
+<h3 id="only-folds-and-horses">Only folds and horses</h3>
+<p>The tutorial claims that if you need to traverse a list once and return some result based on all elements, the chances are you want a fold. I think that you can always use a fold but there may exist some other function whose use will make your intent clearer.</p>
+<p>Haskell has four <code>fold</code> functions (whose effects are equivalent to the APL reduce operator) and four <code>scan</code> functions (whose effects are equivalent to the APL scan operator).</p>
+<p>The signatures of the four fold functions are:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="fu">foldl</span>
+<span class="ot">    foldl ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> [b] <span class="ot">-&gt;</span> a
+    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="fu">foldl1</span>
+<span class="ot">    foldl1 ::</span> (a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> a
+
+    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="fu">foldr</span>
+<span class="ot">    foldr ::</span> (a <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> b <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> b
+    ghci<span class="fu">&gt;</span> <span class="fu">:</span>t <span class="fu">foldr1</span>
+<span class="ot">    foldr1 ::</span> (a <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> a</code></pre>
+<p>All return an accumulated result. The difference between the <code>fold[lr]</code> and <code>fold[lr]1</code> variants is the first take an initial value for the accumulated results while the second take the first element of the list as an accumulated result.</p>
+<p>Note, in the second form, the accumulator has the same type as the elements of the list whereas, in the first form, this need not be the case. Further more, the second form cannot take an empty list, whereas the first can.</p>
+<p>The difference between <code>foldl?</code> and <code>foldr?</code> is the former fold from left-to-right (head-to-tail) while the latter fold from right-to-left (tail-to-head).</p>
+<p>Note the signature of the function passed to the fold function. For the left fold it is <code>acc x -&gt; acc</code> whereas from the right it is <code>x acc -&gt; acc</code>.</p>
+<p>Two implementations of sum using folds:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    sum&#39; ::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> a
+    sum&#39; xs <span class="fu">=</span> <span class="fu">foldl</span> (\acc x <span class="ot">-&gt;</span> acc <span class="fu">+</span> x) <span class="dv">0</span> xs
+
+<span class="ot">    sum&#39;&#39; ::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> a
+    sum&#39;&#39; <span class="fu">=</span> <span class="fu">foldl1</span> (<span class="fu">+</span>)</code></pre>
+<p>And one for map:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    map&#39;&#39; ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [b]
+    map&#39;&#39; f xs <span class="fu">=</span> <span class="fu">foldr</span> (\x acc <span class="ot">-&gt;</span> f x <span class="fu">:</span> acc) [] xs</code></pre>
+<p>When the accumulator is a list, the right fold is much more efficient: prepending values to a list is cheaper than appending them.</p>
+<p>This is interesting because other functional programming languages have only the left fold. They also prepend to the accumulator but must then reverse the result before return. This arrangement would seem to be incompatible with lazy evaluation and so may explain why Haskell has a right as well as a left fold.</p>
+<p>Note: you cannot fold from the left on infinite series but you can fold from the right. Do not ask why.</p>
+<p>To illustrate the use of fold (and not necessary good Haskell programming practice), here are some more examples of alternative implementations of standard library functions.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    maximum&#39; ::</span> (<span class="kw">Ord</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> a
+    maximum&#39; <span class="fu">=</span> <span class="fu">foldr1</span> (\x acc <span class="ot">-&gt;</span> <span class="kw">if</span> x <span class="fu">&gt;</span> acc <span class="kw">then</span> x <span class="kw">else</span> acc)
+
+<span class="ot">    reverse&#39; ::</span> [a] <span class="ot">-&gt;</span> [a]
+    reverse&#39; <span class="fu">=</span> <span class="fu">foldl</span> (\acc x <span class="ot">-&gt;</span> x <span class="fu">:</span> acc) []
+
+<span class="ot">    product&#39; ::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> a
+    product&#39; <span class="fu">=</span> <span class="fu">foldr1</span> (<span class="fu">*</span>)
+
+<span class="ot">    filter&#39;&#39; ::</span> (a <span class="ot">-&gt;</span> <span class="dt">Bool</span>) <span class="ot">-&gt;</span> [a] <span class="ot">-&gt;</span> [a]
+    filter&#39;&#39; p <span class="fu">=</span> <span class="fu">foldr</span>  (\x acc <span class="ot">-&gt;</span> <span class="kw">if</span> p x <span class="kw">then</span> x <span class="fu">:</span> acc <span class="kw">else</span> acc) []
+
+<span class="ot">    head&#39; ::</span> [a] <span class="ot">-&gt;</span> a
+    head&#39; <span class="fu">=</span> <span class="fu">foldr</span> (\x _ <span class="ot">-&gt;</span> x)
+
+<span class="ot">    last&#39; ::</span> [a] <span class="ot">-&gt;</span> a
+    last&#39; <span class="fu">=</span> <span class="fu">foldl</span> (\_ x <span class="ot">-&gt;</span> x)</code></pre>
+<p>The implementation of reverse makes the intent very clear. Contrast that with:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    reverse&#39;&#39; ::</span> [a] <span class="ot">-&gt;</span> [a]
+    reverse&#39;&#39; <span class="fu">=</span> <span class="fu">foldl</span> (<span class="fu">flip</span> (<span class="fu">:</span>)) []</code></pre>
+<p>Now some things begin to look a little clearer. The <code>flip</code> function is about reordering another functions parameters to meet the function's requirements, it is not about achieving a complementary result with non-commutative parameters.</p>
+<p>Here are a few examples of using scan:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">scanl</span> (<span class="fu">+</span>) <span class="dv">0</span> [<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    [<span class="dv">0</span>,<span class="dv">3</span>,<span class="dv">8</span>,<span class="dv">10</span>,<span class="dv">11</span>]
+    ghci<span class="fu">&gt;</span> <span class="fu">scanr</span> (<span class="fu">+</span>) <span class="dv">0</span> [<span class="dv">3</span>,<span class="dv">5</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    [<span class="dv">11</span>,<span class="dv">10</span>,<span class="dv">8</span>,<span class="dv">3</span>,<span class="dv">0</span>]
+
+    ghci<span class="fu">&gt;</span> <span class="fu">scanl1</span> (\acc x <span class="ot">-&gt;</span> <span class="kw">if</span> x <span class="fu">&gt;</span> acc <span class="kw">then</span> x <span class="kw">else</span> acc) [<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">3</span>,<span class="dv">7</span>,<span class="dv">9</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    [<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">5</span>,<span class="dv">7</span>,<span class="dv">9</span>,<span class="dv">9</span>,<span class="dv">9</span>]
+    ghci<span class="fu">&gt;</span> <span class="fu">scanl</span> (<span class="fu">flip</span> (<span class="fu">:</span>)) [] [<span class="dv">3</span>,<span class="dv">2</span>,<span class="dv">1</span>]
+    [[],[<span class="dv">3</span>],[<span class="dv">2</span>,<span class="dv">3</span>],[<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>]]</code></pre>
+<p>The surprise here is the order of the result for <code>scanr</code>.</p>
+<p>A slightly less trivial use: how many elements does it take for the sums of the roots of all natural numbers to exceed 1000 ?</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">length</span> (<span class="fu">takeWhile</span> (<span class="fu">&lt;</span><span class="dv">1000</span>) (<span class="fu">scanl1</span> (<span class="fu">+</span>) (<span class="fu">map</span> <span class="fu">sqrt</span> [<span class="dv">1</span><span class="fu">..</span>]))) <span class="fu">+</span> <span class="dv">1</span>
+    <span class="dv">131</span></code></pre>
+<h3 id="function-application-with">Function application with $</h3>
+<p>Believe it or not, <code>$</code> is a function with the following definition:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    ($) ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> b
+    f <span class="fu">$</span> x <span class="fu">=</span> f x</code></pre>
+<p>and before you spend too long wondering what is so special about this, it must be pointed out that what is special is that is has the lowest precedence of all operator and is right associative.</p>
+<p>One use (misuse ?) of this is simply to avoid parentheses:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    <span class="fu">&gt;</span>ghci <span class="fu">sqrt</span> (<span class="dv">3</span> <span class="fu">+</span> <span class="dv">4</span> <span class="fu">+</span> <span class="dv">5</span>)      <span class="co">-- is the same as</span>
+    <span class="fu">&gt;</span>ghci <span class="fu">sqrt</span> <span class="fu">$</span> <span class="dv">3</span> <span class="fu">+</span> <span class="dv">4</span> <span class="fu">+</span> <span class="dv">5</span>
+                                <span class="co">-- whereas</span>
+
+    <span class="fu">&gt;</span>ghci <span class="fu">sqrt</span> <span class="dv">3</span> <span class="fu">+</span> <span class="dv">4</span> <span class="fu">+</span> <span class="dv">5</span>        <span class="co">-- is the same as</span>
+    <span class="fu">&gt;</span>ghci (<span class="fu">sqrt</span> <span class="dv">3</span>) <span class="fu">+</span> <span class="dv">4</span> <span class="fu">+</span> <span class="dv">5</span></code></pre>
+<p>Because it is right associative it is handy when parentheses begin to nest themselves:</p>
+<p><code>haskell     ghci&gt; sum(filter (&gt; 10) (map (* 2) [2..10))     ghci&gt; sum $ filter  (&gt; 10) $ map (* 2) [2..10]]</code>*)</p>
+<p>but note that this (missing) closing parenthesis is (logically) at the end of the line.</p>
+<p>What this operator really does is allows the mapping of a function over the list of functions:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">map</span> (<span class="fu">$</span> <span class="dv">3</span>) [(<span class="dv">4</span><span class="fu">+</span>), (<span class="dv">10</span><span class="fu">*</span>), (<span class="fu">^</span><span class="dv">2</span>), <span class="fu">sqrt</span>]
+    [<span class="fl">7.0</span>,<span class="fl">30.0</span>,<span class="fl">9.0</span>,<span class="fl">1.7320508075688772</span>]</code></pre>
+<h3 id="function-composition">Function composition</h3>
+<p>In Haskell, <code>function composition</code> is based on function composition in mathematics. It is defined as follows:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    (.) ::</span> (b <span class="ot">-&gt;</span> c) (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> c
+    f <span class="fu">.</span> g <span class="fu">=</span> \x <span class="ot">-&gt;</span> f (g x)</code></pre>
+<p>One use for this operator is to replace lambda function with a clearer, more concise, expression. The following are equivalent:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    ghci<span class="fu">&gt;</span> <span class="fu">map</span> (<span class="fu">negate</span> <span class="fu">.</span> <span class="fu">sum</span> <span class="fu">.</span> <span class="fu">tail</span>) [[<span class="dv">1</span><span class="fu">..</span><span class="dv">5</span>],[<span class="dv">3</span><span class="fu">..</span><span class="dv">6</span>],[<span class="dv">1</span><span class="fu">..</span><span class="dv">7</span>]]
+    [<span class="fu">-</span><span class="dv">14</span>,<span class="fu">-</span><span class="dv">15</span>,<span class="fu">-</span><span class="dv">27</span>]
+    ghci<span class="fu">&gt;</span> <span class="fu">map</span> (\xs <span class="ot">-&gt;</span> <span class="fu">negate</span> (<span class="fu">sum</span> (<span class="fu">tail</span> xs))) [[<span class="dv">1</span><span class="fu">..</span><span class="dv">5</span>],[<span class="dv">3</span><span class="fu">..</span><span class="dv">6</span>],[<span class="dv">1</span><span class="fu">..</span><span class="dv">7</span>]]
+    [<span class="fu">-</span><span class="dv">14</span>,<span class="fu">-</span><span class="dv">15</span>,<span class="fu">-</span><span class="dv">27</span>]
+    ghci<span class="fu">&gt;</span> <span class="fu">map</span> <span class="fu">negate</span> (<span class="fu">map</span> <span class="fu">sum</span> (<span class="fu">map</span> <span class="fu">tail</span> [[<span class="dv">1</span><span class="fu">..</span><span class="dv">5</span>],[<span class="dv">3</span><span class="fu">..</span><span class="dv">6</span>],[<span class="dv">1</span><span class="fu">..</span><span class="dv">7</span>]]))
+    [<span class="fu">-</span><span class="dv">14</span>,<span class="fu">-</span><span class="dv">15</span>,<span class="fu">-</span><span class="dv">27</span>]</code></pre>
+<p>Another use is in <code>point free</code> notation. Due to the nature of currying:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">    sum&#39; ::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> a
+    sum&#39; xs <span class="fu">=</span> <span class="fu">foldl</span> (<span class="fu">+</span>) <span class="dv">0</span> xs
+
+<span class="ot">    sum&#39;pf ::</span> (<span class="kw">Num</span> a) <span class="ot">=&gt;</span> [a] <span class="ot">-&gt;</span> a
+    sum&#39;pf <span class="fu">=</span> <span class="fu">foldl</span> (<span class="fu">+</span>) <span class="dv">0</span></code></pre>
+<p>are equivalent. The latter may take some getting used to (the type declaration tell you the function takes one parameter).</p>
+<p>Taking the <code>point free</code> notation to its logical conclusion, the following are equivalent:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    fn&#39; x <span class="fu">=</span> <span class="fu">ceiling</span> (<span class="fu">negate</span> (<span class="fu">tan</span> (cod (<span class="fu">max</span> <span class="dv">50</span> x))))
+
+    fn&#39;pf <span class="fu">=</span> <span class="fu">ceiling</span> <span class="fu">.</span> <span class="fu">negate</span> <span class="fu">.</span> <span class="fu">tan</span> <span class="fu">.</span> <span class="fu">cos</span> <span class="fu">.</span> <span class="fu">max</span> <span class="dv">50</span></code></pre>
+<p>The tutorial warns against this and suggests using <code>let ... in</code> expressions to make the intent clear. I guess it depends.</p>
+<p>The <code>.</code> operators will only combine functions that take one parameter so <code>partial application</code> is required for functions that take more than one.</p>
+</body>
+</html>
+
+

@@ -4,10 +4,15 @@ import Data.Char (toLower)
 
 isPangram :: String -> Bool
 isPangram text =
-    all (\a -> any (\c -> c == a) lower) ['a'..'z']
+    all (\a -> any (a==) lower) ['a'..'z']
     where lower = map toLower text
 
 --
--- The monitor for this exercise suggested I use a 'section'.
--- So I did.  See iteration #2.
+-- The hlint tool suggested I use the library function elem.
+-- That would give:
 --
+
+isPangram' :: String -> Bool
+isPangram' text =
+    all (\a -> elem a lower) ['a'..'z']
+    where lower = map toLower text

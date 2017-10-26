@@ -1,41 +1,32 @@
 module RunLength (decode, encode) where
 
-import Data.Char (digitToInt)
+import Data.Char (isDigit)
+import Data.List (group)
 
 --
 
 decode :: String -> String
-decode encodedText = decoder encodedText 0 ""
-
-decoder :: String -> Int -> String -> String
-decoder [] _ result
-    = result
-decoder (x:xs) count result
-    | elem x ['0'..'9'] = decoder xs (10 * count + digitToInt x) result
-    | otherwise         = decoder xs 0 $ (++) result $ replicate (max 1 count) x
+decode "" = ""
+decode encodedText
+    | count == ""   = x : decode xs
+    | otherwise     = replicate (read count) x ++ decode xs
+    where (count, x:xs) = span isDigit encodedText
 
 --
 
 encode :: String -> String
-encode text = encoder text 0 '!' ""
+encode "" = ""
+encode text = concat [encodeRun run | run <- group text]
 
-encoder :: String -> Int -> Char -> String -> String
-encoder [] count letter result
-    = glue result count letter
-encoder (x:xs) count letter result
-    | x == letter       = encoder xs (count + 1) letter result
-    | otherwise         = encoder xs 1 x $ glue result count letter
-
-glue :: String -> Int -> Char -> String
-glue encoding count letter
-    | count == 0    = encoding
-    | count == 1    = (++) encoding [letter]
-    | otherwise     = (++) encoding $ (++) (show count) [letter]
+encodeRun :: String -> String
+encodeRun run
+    | count == 1    = letter
+    | otherwise     = (++) (show count) letter
+    where letter = [head run]
+          count = length run
 
 -- ^
--- Most of the other solution I looked at do not use recursion
--- but use library functions (that must do the recursion)
---      decode: read (opposite of show). span
---      encode: concatMap, group, groupBy (all three in Data.list), span
+-- Refactored to use library functions span and group after a comment from the
+-- invigilator and examining other solutions.
+-- Iteration #3 removes spurious () reported by hlint.
 --
--- Feedback from the monitor suggest glue does two things and should be split

@@ -1,39 +1,19 @@
 module Isogram (isIsogram) where
 
+import Data.Set (Set, size, fromList)
 import Data.Char (toLower, isLetter)
 
 isIsogram :: String -> Bool
 isIsogram string =
-    checkIsogram [toLower c | c <- string, isLetter c]
-
-checkIsogram :: String -> Bool
-checkIsogram "" =
-    True
-checkIsogram (x:xs)
-    | elem x xs     = False
-    | otherwise     = checkIsogram xs
+    length (clean string) == size (fromList (clean string))
+    where clean string = [toLower c | c <- string, isLetter c]
 
 -- ^
--- Most solutions I looked at did not use a list comprehension
--- Many used nub to removed duplicates.
--- One then used sort which seems overkill.
+-- A two line solution using libraries after a suggestion by @teehemkay.
+-- It uses set rather than nub and so has a better O.
+-- For isogram, with N bounded at 26, the O is not important
 --
--- As I thought, it should be possible to do this in one function.
+-- However, it is good to know that using set is not onerous.
 --
-
-isIsogram' :: String -> Bool
-isIsogram' string =
-    checkIsogram [toLower c | c <- string, isLetter c]
-    where checkIsogram "" = True
-          checkIsogram (x:xs)
-              | elem x xs     = False
-              | otherwise     = checkIsogram xs
-
--- ^
--- If nub is used to do the heavy lifting we might have:
+-- Note that to import Data.Set I had to change the build parameters.
 --
-
-isIsogram'' :: String -> Bool
-isIsogram'' string =
-    checkIsogram [toLower c | c <- string, isLetter c]
-    where checkIsogram string = string == nub string

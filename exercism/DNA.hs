@@ -4,12 +4,12 @@ import Data.Maybe(fromJust, isNothing)
 
 toRNA :: String -> Maybe String
 toRNA =
-    foldl dna (Just[])
+    foldr dna (Just[])
     where
-        dna Nothing _ = Nothing
-        dna rna nucleotide
+        dna _ Nothing = Nothing
+        dna nucleotide rna
             | isNothing (toRNA' nucleotide) = Nothing
-            | otherwise = Just $ fromJust rna ++ [fromJust (toRNA' nucleotide)]
+            | otherwise = Just $ fromJust (toRNA' nucleotide) : fromJust rna
 
         toRNA' 'G' = Just 'C'
         toRNA' 'C' = Just 'G'
@@ -18,8 +18,11 @@ toRNA =
         toRNA'  _  = Nothing
 
 --
--- This iteration uses heads and guards to make it clear we want the function
--- to stop and go no further with:
+-- This iteration uses foldr:
 --
---     dna Nothing _ = Nothing
+--   * good list construction uses : instead of ++
+--   * foldr instead of foldl allows early termination
+--   * needs an awful lot of stack
+--
+-- So it's a two out of three ain't bad solution.
 --

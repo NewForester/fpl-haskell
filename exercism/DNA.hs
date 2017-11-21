@@ -1,15 +1,21 @@
 module DNA (toRNA) where
 
-import Data.Maybe(fromJust, isNothing)
+import Data.Maybe(fromJust)
+import Data.Sequence(empty, (|>))
+import Data.Foldable(foldl', toList)
 
 toRNA :: String -> Maybe String
-toRNA =
-    foldr dna (Just[])
+toRNA xs =
+    rna $ foldl' dna (Just empty) xs
     where
-        dna _ Nothing = Nothing
-        dna nucleotide rna
-            | isNothing (toRNA' nucleotide) = Nothing
-            | otherwise = Just $ fromJust (toRNA' nucleotide) : fromJust rna
+        rna Nothing = Nothing
+        rna rnaSeq = Just $ toList $ fromJust rnaSeq
+
+        dna Nothing _ = Nothing
+        dna rnaSeq nucleotide = dna' rnaSeq (toRNA' nucleotide)
+
+        dna' _ Nothing = Nothing
+        dna' rnaSeq nucleotide = Just $ fromJust rnaSeq |> fromJust nucleotide
 
         toRNA' 'G' = Just 'C'
         toRNA' 'C' = Just 'G'
@@ -18,11 +24,21 @@ toRNA =
         toRNA'  _  = Nothing
 
 --
--- This iteration uses foldr:
+-- This iteration uses:
 --
---   * good list construction uses : instead of ++
---   * foldr instead of foldl allows early termination
---   * needs an awful lot of stack
+--  * Data.Sequence instead of Data.List
+--  * no 'guards', only 'function headers'
 --
--- So it's a two out of three ain't bad solution.
+-- The Data.Sequence allows data to be added to the end in constant time.
+-- This, in turn, allows the use of the memory and time efficient foldl'.
+--
+-- The downside is an extra pass over the data is needed to convert back to a
+-- list and the sequence may increase heap memory requirements considerably
+-- although, in this case, I would expect the lower stack memory requirements
+-- mean the benefits outweigh the costs.
+--
+-- Using foldl' means the fold will not stop early but I suspect that the new
+-- rna routine will stop early instead.
+--
+-- It would be nice to have execution trace to confirm this.
 --

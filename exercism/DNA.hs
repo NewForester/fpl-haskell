@@ -1,21 +1,10 @@
 module DNA (toRNA) where
 
-import Data.Maybe(fromJust)
-import Data.Sequence(empty, (|>))
-import Data.Foldable(foldl', toList)
-
 toRNA :: String -> Maybe String
-toRNA xs =
-    rna $ foldl' dna (Just empty) xs
+toRNA =
+    foldr dna (Just[])
     where
-        rna Nothing = Nothing
-        rna rnaSeq = Just $ toList $ fromJust rnaSeq
-
-        dna Nothing _ = Nothing
-        dna rnaSeq nucleotide = dna' rnaSeq (toRNA' nucleotide)
-
-        dna' _ Nothing = Nothing
-        dna' rnaSeq nucleotide = Just $ fromJust rnaSeq |> fromJust nucleotide
+        dna nucleotide rnaSeq = (:) <$> toRNA' nucleotide <*> rnaSeq
 
         toRNA' 'G' = Just 'C'
         toRNA' 'C' = Just 'G'
@@ -24,21 +13,16 @@ toRNA xs =
         toRNA'  _  = Nothing
 
 --
--- This iteration uses:
+-- This iteration is a lot more succinct.  It does not use `fromJust`
+-- and `Just` (explicitly) to do things to stuff inside `Maybe`s.
 --
---  * Data.Sequence instead of Data.List
---  * no 'guards', only 'function headers'
+-- This is not just the discovery of apprporiate syntax or library functions to
+-- do the job.  This uses functions from the 'applicative' typeclass.  It seems
+-- you need this:  'functors' are not sufficient and 'monoids' more than.
 --
--- The Data.Sequence allows data to be added to the end in constant time.
--- This, in turn, allows the use of the memory and time efficient foldl'.
+-- The even neater solutions that use `traverse` and `mapM` are, in a loose
+-- sense, the `applicative` and `monoid` equivalents of `foldr`.
 --
--- The downside is an extra pass over the data is needed to convert back to a
--- list and the sequence may increase heap memory requirements considerably
--- although, in this case, I would expect the lower stack memory requirements
--- mean the benefits outweigh the costs.
---
--- Using foldl' means the fold will not stop early but I suspect that the new
--- rna routine will stop early instead.
---
--- It would be nice to have execution trace to confirm this.
+-- The use of `foldr` means this is memory greedy.  I suspect `traverse` and
+-- `mapM` need not be but lazy evaluation means they probably are.
 --

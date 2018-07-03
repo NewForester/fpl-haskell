@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    <!-- haskell notes by NewForester is licensed under a Creative Commons Attribution-ShareAlike 4.0 International Licence. -->
+<head>
+    <title>
+Learn You A Haskell Notes: Introduction
+</title>
+    
+<meta charset="UTF-8" /> <meta name="description" content="Notes on the Haskell programming language made while learning a bit about Functional Programming" /> <meta name="keywords" content="Haskell" /> <meta name="author" content="NewForester" /> <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="stylesheet" href="../styles/style-sheet.css" />
+</head>
+
+<body>
+
+<h1 id="learn-you-a-haskell">Learn You A Haskell</h1>
+<h2 id="introduction">Introduction</h2>
+<h3 id="about-this-tutorial">About This Tutorial</h3>
+<p>The author intends to describe Haskell from this point of view after reading and studying various Internet resources each of which provided a slightly different perspective.</p>
+<p>The tutorial is aimed at people who have experience of programming <code>imperative</code> but not <code>functional</code> programming languages. The author claims that programming in Haskell forces you to think differently and learning Haskell is a bit like learning to program for the first time. However, once it has 'clicked', it is straight forward.</p>
+<h3 id="so-whats-haskell">So What's Haskell</h3>
+<p>Haskell is a <code>purely functional programming language</code>:</p>
+<p>Rather than tell the computer how to do stuff, the language tells the computer what stuff is: the factorial of a number is the product of all numbers from 1 to that number.</p>
+<p>You cannot set a variable to something and then set it to something else later: <code>variables are invariant</code>.</p>
+<p>Functions calculate something using their parameters and return a result. They have no side-effects. Given the same input they always return the same result (aka <code>referential integrity</code>).</p>
+<p>Haskell is <code>lazy</code>: it does not execute a function until the result is required. It helps to think of a program as a series of <code>transformations</code> of data.</p>
+<p>One interesting consequence that:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    xs <span class="fu">=</span> [<span class="dv">1</span>,<span class="dv">2</span>,<span class="dv">3</span>,<span class="dv">4</span>,<span class="dv">5</span>,<span class="dv">6</span>,<span class="dv">7</span>,<span class="dv">8</span>]
+    doubleMe(doubleMe(doubleMe(xs)))</code></pre>
+<p>traverses the list xs only once whereas most languages will traverse the list thrice.</p>
+<p>Another interesting consequence is that you can have infinite lists. The result of an expression on an infinite list typically only requires the first so many elements. With lazy evaluation, you only evaluate those elements you need so the list itself may be infinite without requiring either infinite memory or infinite processing.</p>
+<p>Haskell is <code>statically</code> typed. It uses <code>type inference</code> so you do not need to label every peice of code with a type. Code without types is more general (no need for C++ ugly templates).</p>
+<p>Hasell is <code>elegant</code> and <code>concise</code>. The first may be a matter of opinion but the later implies shorter programs and so fewer bugs.</p>
+<p>Work on Haskell began in academia in <code>1987</code>. The Haskell Report that defined the stable version of the language was publised in <code>2003</code>.</p>
+<h3 id="what-you-need-to-dive-in">What you need to dive in</h3>
+<p>You need a <code>text editor</code> and a <code>Haskell compiler</code>. It is recommended you install the <code>Haskell Platform</code> which includes the GHC (Glasgow Haskell Compiler).</p>
+<p>Haskell scripts (with functions) are created using the text editor and saved into files with the <code>.hs</code> extension.</p>
+<p>The compiler has an interactive mode (invoke <code>ghci</code>) that allows you to compile and load your script file and then invoke the function defined within it.</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    <span class="fu">$</span> ghci
+    <span class="dt">GHCi</span>, version <span class="fl">7.4</span><span class="fu">.</span><span class="dv">1</span><span class="fu">:</span> http<span class="fu">://</span>www<span class="fu">.</span>haskell<span class="fu">.</span>org<span class="fu">/</span>ghc<span class="fu">/</span>  <span class="fu">:?</span> for help
+    <span class="dt">Loading</span> package ghc<span class="fu">-</span>prim <span class="fu">...</span> linking <span class="fu">...</span> done<span class="fu">.</span>
+    <span class="dt">Loading</span> package integer<span class="fu">-</span>gmp <span class="fu">...</span> linking <span class="fu">...</span> done<span class="fu">.</span>
+    <span class="dt">Loading</span> package base <span class="fu">...</span> linking <span class="fu">...</span> done<span class="fu">.</span>
+    ghci<span class="fu">&gt;</span> <span class="fu">:</span>l myScript
+    [<span class="dv">1</span> <span class="kw">of</span> <span class="dv">1</span>] <span class="dt">Compiling</span> <span class="dt">Main</span>             ( myScript<span class="fu">.</span>hs, interpreted )
+    <span class="dt">Ok</span>, modules loaded<span class="fu">:</span> <span class="dt">Main</span><span class="fu">.</span>
+    ghci<span class="fu">&gt;</span> doubleMe <span class="fl">8.3</span>
+    <span class="fl">16.6</span></code></pre>
+<p>The script may be edited, saved and reloaded without leaving the interactive environment:</p>
+<pre class="sourceCode haskell"><code class="sourceCode haskell">    <span class="dt">Prelude</span><span class="fu">&gt;</span> <span class="fu">:</span>l myScript        <span class="co">-- load the module again</span>
+    <span class="dt">Prelude</span><span class="fu">&gt;</span> <span class="fu">:</span>r                 <span class="co">-- load the last module loaded again</span></code></pre>
+</body>
+</html>
+
+
